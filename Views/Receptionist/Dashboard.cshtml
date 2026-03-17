@@ -1,0 +1,77 @@
+@model IEnumerable<FrontendEXAM.Models.QueueEntry>
+
+@{
+    ViewData["Title"] = "Queue Management";
+    var currentDate = ViewBag.CurrentDate as string;
+}
+
+<div class="d-flex justify-content-between align-items-center page-title">
+    <h3 class="mb-0">Queue Management</h3>
+    <form method="get" asp-action="Dashboard" class="d-flex align-items-center gap-2">
+        <label for="date" class="form-label mb-0">Date:</label>
+        <input type="date" id="date" name="date" value="@currentDate" class="form-control form-control-sm" style="width:170px;" onchange="this.form.submit()" />
+    </form>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Token</th>
+            <th>Patient</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var entry in Model.OrderBy(q => q.TokenNumber))
+            {
+                var patientName = entry.Appointment?.Patient?.Name ?? "Unknown";
+                var badgeClass = entry.Status?.ToLower() switch {
+                    "done" => "badge-done",
+                    "in_progress" => "badge-progress",
+                    "skipped" => "badge-skipped",
+                    _ => "badge-waiting"
+                };
+                <tr>
+                    <td><span class="token-num">#@entry.TokenNumber</span></td>
+                    <td>@patientName</td>
+                    <td><span class="badge @badgeClass">@entry.Status</span></td>
+                    <td>
+                        <form asp-action="UpdateStatus" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@entry.Id" />
+                            <input type="hidden" name="date" value="@currentDate" />
+
+                            @if (entry.Status == "waiting" || entry.Status == "skipped")
+                            {
+                                <button type="submit" name="status" value="in-progress" class="btn btn-sm btn-primary">Call</button>
+                            }
+                            @if (entry.Status == "in_progress")
+                            {
+                                <button type="submit" name="status" value="done" class="btn btn-sm btn-success">Done</button>
+                            }
+                            @if (entry.Status == "waiting" || entry.Status == "in_progress")
+                            {
+                                <button type="submit" name="status" value="skipped" class="btn btn-sm btn-danger ms-1" onclick="return confirm('Skip this patient?');">Skip</button>
+                            }
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="4" class="text-center text-muted py-3">No entries for this date.</td></tr>
+        }
+    </tbody>
+</table>

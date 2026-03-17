@@ -1,0 +1,64 @@
+@model IEnumerable<FrontendEXAM.Models.DoctorQueueItem>
+
+@{
+    ViewData["Title"] = "My Queue";
+}
+
+<div class="d-flex justify-content-between align-items-center page-title">
+    <h3 class="mb-0">Today's Queue</h3>
+    <span class="text-muted">@DateTime.Today.ToString("dd MMM yyyy")</span>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Token</th>
+            <th>Patient</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model.OrderBy(q => q.TokenNumber))
+            {
+                var badgeClass = item.Status?.ToLower() switch {
+                    "done" => "badge-done",
+                    "in_progress" => "badge-progress",
+                    "skipped" => "badge-skipped",
+                    _ => "badge-waiting"
+                };
+                <tr>
+                    <td><span class="token-num">#@item.TokenNumber</span></td>
+                    <td>@item.PatientName</td>
+                    <td><span class="badge @badgeClass">@item.Status</span></td>
+                    <td>
+                        @if (item.Status == "in_progress" || item.Status == "done")
+                        {
+                            <a asp-action="AddPrescription" asp-route-id="@item.AppointmentId" class="btn btn-sm btn-primary">Prescription</a>
+                            <a asp-action="AddReport" asp-route-id="@item.AppointmentId" class="btn btn-sm btn-success ms-1">Report</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Waiting</span>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="4" class="text-center text-muted py-3">No patients in queue today.</td></tr>
+        }
+    </tbody>
+</table>

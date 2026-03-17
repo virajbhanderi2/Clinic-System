@@ -1,0 +1,41 @@
+@model FrontendEXAM.Models.AddReportRequest
+
+@{
+    ViewData["Title"] = "Add Report";
+}
+
+<div class="d-flex justify-content-between align-items-center page-title">
+    <h3 class="mb-0">Add Report</h3>
+    <a asp-action="Dashboard" class="btn btn-sm btn-secondary">Back</a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header card-header-purple">Report Form</div>
+            <div class="card-body">
+                <form asp-action="AddReport" method="post">
+                    <input type="hidden" name="id" value="@ViewBag.AppointmentId" />
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Diagnosis" class="form-label">Diagnosis</label>
+                        <textarea asp-for="Diagnosis" class="form-control" rows="2" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="TestRecommended" class="form-label">Tests Recommended</label>
+                        <textarea asp-for="TestRecommended" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Remarks" class="form-label">Remarks</label>
+                        <textarea asp-for="Remarks" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Report</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
